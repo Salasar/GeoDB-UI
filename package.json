@@ -1,9 +1,9 @@
 {
-  "name": "geodb-ui",
+  "name": "cities-explorer",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "homepage": "https://salasar.github.io/geodb-ui/",
+  "homepage": "https://salasar.github.io/cities-explorer/",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

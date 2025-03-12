@@ -20,7 +20,7 @@ A web application that allows users to explore cities worldwide using the GeoDB 
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/cities-explorer.git
+   git clone https://github.com/salasar/cities-explorer.git
    cd cities-explorer
    ```
 
