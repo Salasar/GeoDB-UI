@@ -11,6 +11,7 @@ export default defineConfig({
       localsConvention: 'camelCase'
     }
   },
+  base: '/cities-explorer/',
   test: {
     globals: true,
     environment: 'jsdom',
