@@ -1,8 +1,18 @@
 import React from 'react';
+import L from 'leaflet';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { City } from '../../types/city';
 import 'leaflet/dist/leaflet.css';
 import styles from './CityMap.module.scss';
+
+// hack to make icons work in prod
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+
+let DefaultIcon = L.icon({
+  iconUrl: icon,
+  shadowUrl: iconShadow
+});
 
 interface CityMapProps {
   cities: City[];
@@ -27,6 +37,7 @@ const CityMap: React.FC<CityMapProps> = ({ cities, selectedCity }) => {
         />
         {cities.map((city) => (
           <Marker
+            icon={DefaultIcon}
             key={city.id}
             position={[city.latitude, city.longitude]}
           >
