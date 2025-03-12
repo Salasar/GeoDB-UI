@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { searchCities } from '../services/api';
 import { City } from '../types/city';
 import styles from './CitySearch.module.scss';
@@ -7,7 +7,6 @@ import CityMap from './CityMap';
 interface Filters {
   minPopulation: number;
   maxPopulation: number;
-  country: string;
 }
 
 const ITEMS_PER_PAGE = 10;
@@ -22,19 +21,8 @@ const CitySearch: React.FC = () => {
   const [filters, setFilters] = useState<Filters>({
     minPopulation: 0,
     maxPopulation: Infinity,
-    country: '',
   });
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
-
-  const filteredCities = useMemo(() => {
-    return cities.filter((city) => {
-      const matchesPopulation =
-        city.population >= filters.minPopulation &&
-        (filters.maxPopulation === Infinity || city.population <= filters.maxPopulation);
-      const matchesCountry = !filters.country || city.country.toLowerCase().includes(filters.country.toLowerCase());
-      return matchesPopulation && matchesCountry;
-    });
-  }, [cities, filters]);
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -48,7 +36,13 @@ const CitySearch: React.FC = () => {
       setError(null);
 
       try {
-        const response = await searchCities(searchTerm, currentPage * ITEMS_PER_PAGE, ITEMS_PER_PAGE);
+        const response = await searchCities(
+          searchTerm,
+          currentPage * ITEMS_PER_PAGE,
+          ITEMS_PER_PAGE,
+          filters.minPopulation,
+          filters.maxPopulation,
+        );
         setCities(response.data);
         setTotalCount(response.metadata.totalCount);
       } catch (err) {
@@ -61,7 +55,7 @@ const CitySearch: React.FC = () => {
 
     const debounceTimer = setTimeout(fetchCities, 500);
     return () => clearTimeout(debounceTimer);
-  }, [searchTerm, currentPage]);
+  }, [searchTerm, currentPage, filters]);
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
@@ -82,13 +76,6 @@ const CitySearch: React.FC = () => {
           value={filters.maxPopulation === Infinity ? '' : filters.maxPopulation}
           onChange={(e) => setFilters({ ...filters, maxPopulation: Number(e.target.value) || Infinity })}
         />
-        <input
-          type="text"
-          placeholder="Filter by Country"
-          className={styles.filterInput}
-          value={filters.country}
-          onChange={(e) => setFilters({ ...filters, country: e.target.value })}
-        />
       </div>
 
       <input
@@ -102,10 +89,10 @@ const CitySearch: React.FC = () => {
       {loading && <p>Loading...</p>}
       {error && <p className={styles.error}>{error}</p>}
 
-      <CityMap cities={filteredCities} selectedCity={selectedCity} />
+      <CityMap cities={cities} selectedCity={selectedCity} />
 
       <ul className={styles.cityList}>
-        {filteredCities.map((city) => (
+        {cities.map((city) => (
           <li 
             key={city.id} 
             className={styles.cityCard}

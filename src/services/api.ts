@@ -15,7 +15,9 @@ const api = axios.create({
 export const searchCities = async (
   namePrefix: string,
   offset: number = 0,
-  limit: number = 10
+  limit: number = 10,
+  minPopulation?: number,
+  maxPopulation?: number,
 ): Promise<CitySearchResponse> => {
   const response = await api.get('/cities', {
     params: {
@@ -23,6 +25,8 @@ export const searchCities = async (
       offset,
       limit,
       sort: '-population',
+      ...(minPopulation ? { minPopulation } : {}),
+      ...(maxPopulation && maxPopulation !== Infinity ? { maxPopulation } : {}),
     },
   });
   return response.data;
