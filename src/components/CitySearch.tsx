@@ -10,11 +10,15 @@ interface Filters {
   country: string;
 }
 
+const ITEMS_PER_PAGE = 10;
+
 const CitySearch: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [cities, setCities] = useState<City[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
   const [filters, setFilters] = useState<Filters>({
     minPopulation: 0,
     maxPopulation: Infinity,
@@ -36,6 +40,7 @@ const CitySearch: React.FC = () => {
     const fetchCities = async () => {
       if (searchTerm.length < 2) {
         setCities([]);
+        setTotalCount(0);
         return;
       }
 
@@ -43,8 +48,9 @@ const CitySearch: React.FC = () => {
       setError(null);
 
       try {
-        const response = await searchCities(searchTerm);
+        const response = await searchCities(searchTerm, currentPage * ITEMS_PER_PAGE, ITEMS_PER_PAGE);
         setCities(response.data);
+        setTotalCount(response.metadata.totalCount);
       } catch (err) {
         setError('Failed to fetch cities. Please try again.');
         setCities([]);
@@ -55,7 +61,9 @@ const CitySearch: React.FC = () => {
 
     const debounceTimer = setTimeout(fetchCities, 500);
     return () => clearTimeout(debounceTimer);
-  }, [searchTerm]);
+  }, [searchTerm, currentPage]);
+
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   return (
     <div className={styles.searchContainer}>
@@ -112,6 +120,28 @@ const CitySearch: React.FC = () => {
           </li>
         ))}
       </ul>
+
+      {totalPages > 1 && (
+        <div className={styles.pagination}>
+          <button
+            onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+            disabled={currentPage === 0 || loading}
+            className={styles.pageButton}
+          >
+            Previous
+          </button>
+          <span className={styles.pageInfo}>
+            Page {currentPage + 1} of {totalPages}
+          </span>
+          <button
+            onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
+            disabled={currentPage >= totalPages - 1 || loading}
+            className={styles.pageButton}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };
